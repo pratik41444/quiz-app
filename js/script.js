@@ -94,7 +94,9 @@ const API_CATEGORIES = {
   'music': { id: 12, name: 'Entertainment: Music', icon: 'fas fa-music' },
   // NOTE: GitHub Pages can't run PHP. Football is rendered as a local fallback
   // unless a DB-backed "Football" genre is available from the backend.
-  'football': { id: 'football', name: 'Football', icon: 'fas fa-futbol' }
+  'football': { id: 'football', name: 'Football', icon: 'fas fa-futbol' },
+  // Cricket is also rendered with a local fallback question bank.
+  'cricket': { id: 'cricket', name: 'Cricket', icon: 'fas fa-baseball-ball' }
 };
 
 // Local fallback question bank for Football (used on GitHub Pages / no backend).
@@ -159,6 +161,70 @@ const FOOTBALL_QUESTIONS = [
     question: 'Which country won the FIFA World Cup in 2010?',
     options: ['Spain', 'Netherlands', 'Germany', 'France'],
     correctAnswer: 'Spain'
+  }
+];
+
+// Local fallback question bank for Cricket (used on GitHub Pages / no backend).
+const CRICKET_QUESTIONS = [
+  {
+    question: 'How many players are there in a cricket team on the field?',
+    options: ['9', '10', '11', '12'],
+    correctAnswer: '11'
+  },
+  {
+    question: 'In ODI cricket, how many overs does each team face?',
+    options: ['20', '30', '50', '60'],
+    correctAnswer: '50'
+  },
+  {
+    question: 'In T20 cricket, how many overs does each team face?',
+    options: ['10', '15', '20', '25'],
+    correctAnswer: '20'
+  },
+  {
+    question: 'How many runs is a boundary worth if the ball crosses the rope after bouncing?',
+    options: ['2', '4', '5', '6'],
+    correctAnswer: '4'
+  },
+  {
+    question: 'How many runs is a boundary worth if the ball crosses the rope without bouncing?',
+    options: ['4', '5', '6', '7'],
+    correctAnswer: '6'
+  },
+  {
+    question: 'What is it called when a bowler takes three wickets in three consecutive balls?',
+    options: ['Hat-trick', 'Triple', 'Clean spell', 'Maiden over'],
+    correctAnswer: 'Hat-trick'
+  },
+  {
+    question: 'What is the maximum number of balls in a standard over?',
+    options: ['4', '5', '6', '8'],
+    correctAnswer: '6'
+  },
+  {
+    question: 'Which format is played over a maximum of five days?',
+    options: ['T20', 'ODI', 'Test', 'The Hundred'],
+    correctAnswer: 'Test'
+  },
+  {
+    question: 'What is a score of 100 runs by a batsman in an innings called?',
+    options: ['Century', 'Double', 'Ton', 'Both A and C'],
+    correctAnswer: 'Both A and C'
+  },
+  {
+    question: 'How many stumps are there at each end of the pitch?',
+    options: ['2', '3', '4', '5'],
+    correctAnswer: '3'
+  },
+  {
+    question: 'In cricket, what is a "maiden over"?',
+    options: ['An over with no runs conceded', 'An over with a wicket', 'An over with a no-ball', 'An over with a wide'],
+    correctAnswer: 'An over with no runs conceded'
+  },
+  {
+    question: 'What is the playing surface called in cricket?',
+    options: ['Court', 'Pitch', 'Field', 'Track'],
+    correctAnswer: 'Pitch'
   }
 ];
 
@@ -253,36 +319,7 @@ async function renderGenres() {
   if (!genreGrid) return;
   genreGrid.innerHTML = '';
 
-  // Render fixed API categories
-  for (const [genreId, category] of Object.entries(API_CATEGORIES)) {
-    const genreCard = createGenreCard(category.icon, category.name, () => startQuiz(genreId));
-    genreGrid.appendChild(genreCard);
-  }
-
-  // Fetch custom genres from server (MySQL)
-  try {
-    const response = await fetch(`${API_BASE}admin/get_genres.php?nocache=${Date.now()}`);
-    if (response.ok) {
-      const customGenres = await response.json();
-      if (Array.isArray(customGenres)) {
-        AppState.genres = customGenres;
-        localStorage.setItem('quizGenres', JSON.stringify(customGenres));
-
-        customGenres.forEach(genre => {
-          const genreCard = createGenreCard(
-            genre.icon || 'fas fa-question',
-            genre.name,
-            () => startCustomQuiz(genre.id)
-          );
-          genreGrid.appendChild(genreCard);
-        });
-      }
-    } else {
-      console.warn('Could not fetch custom genres (network):', response.status);
-    }
-  } catch (error) {
-    console.error('Error loading custom genres:', error);
-  }
+  const normalize = (s) => String(s ?? '').trim().toLowerCase();
 
   // Fetch custom genres from server (MySQL). GitHub Pages can't run PHP, so this
   // typically fails there.
@@ -303,17 +340,17 @@ async function renderGenres() {
     console.error('Error loading custom genres:', error);
   }
 
-  const normalize = (s) => String(s ?? '').trim().toLowerCase();
   const customFootball = customGenres.find(g => normalize(g.name) === 'football');
+  const customCricket = customGenres.find(g => normalize(g.name) === 'cricket');
 
-  // Render fixed API categories EXCEPT football (football is special-cased below)
+  // Render fixed API categories EXCEPT football/cricket (special-cased below)
   for (const [genreId, category] of Object.entries(API_CATEGORIES)) {
-    if (genreId === 'football') continue;
+    if (genreId === 'football' || genreId === 'cricket') continue;
     const genreCard = createGenreCard(category.icon, category.name, () => startQuiz(genreId));
     genreGrid.appendChild(genreCard);
   }
 
-  // Render Football: use DB-backed Football if present, else use local fallback
+  // Render Football: use DB-backed Football if present, else local fallback
   if (customFootball) {
     const genreCard = createGenreCard(
       customFootball.icon || API_CATEGORIES.football.icon,
@@ -327,9 +364,26 @@ async function renderGenres() {
     genreGrid.appendChild(genreCard);
   }
 
-  // Render remaining custom genres (skip Football to avoid duplicates)
+  // Render Cricket: use DB-backed Cricket if present, else local fallback
+  if (customCricket) {
+    const genreCard = createGenreCard(
+      customCricket.icon || API_CATEGORIES.cricket.icon,
+      customCricket.name || API_CATEGORIES.cricket.name,
+      () => startCustomQuiz(customCricket.id)
+    );
+    genreGrid.appendChild(genreCard);
+  } else {
+    const cricket = API_CATEGORIES.cricket;
+    const genreCard = createGenreCard(cricket.icon, cricket.name, () => startQuiz('cricket'));
+    genreGrid.appendChild(genreCard);
+  }
+
+  // Render remaining custom genres (skip Football/Cricket to avoid duplicates)
   customGenres
-    .filter(g => normalize(g.name) !== 'football')
+    .filter(g => {
+      const name = normalize(g.name);
+      return name !== 'football' && name !== 'cricket';
+    })
     .forEach(genre => {
       const genreCard = createGenreCard(
         genre.icon || 'fas fa-question',
@@ -394,21 +448,30 @@ async function startQuiz(genreKey) {
 
     let questions = [];
 
+    // Local fallbacks (work on GitHub Pages / no backend)
+    if (genreKey === 'football') {
+      questions = selectRandomQuestions(FOOTBALL_QUESTIONS, 10);
+    } else if (genreKey === 'cricket') {
+      questions = selectRandomQuestions(CRICKET_QUESTIONS, 10);
+    }
+
     // Try Open Trivia DB API
-    try {
-      const apiRes = await fetch(`https://opentdb.com/api.php?amount=10&category=${genre.id}&type=multiple`);
-      if (apiRes.ok) {
-        const apiQuestions = await apiRes.json();
-        if (apiQuestions.results && apiQuestions.results.length) {
-          questions = apiQuestions.results.map(q => ({
-            question: decodeHTML(q.question),
-            correctAnswer: decodeHTML(q.correct_answer),
-            options: shuffleArray([...q.incorrect_answers.map(decodeHTML), decodeHTML(q.correct_answer)])
-          }));
+    if (!questions.length) {
+      try {
+        const apiRes = await fetch(`https://opentdb.com/api.php?amount=10&category=${genre.id}&type=multiple`);
+        if (apiRes.ok) {
+          const apiQuestions = await apiRes.json();
+          if (apiQuestions.results && apiQuestions.results.length) {
+            questions = apiQuestions.results.map(q => ({
+              question: decodeHTML(q.question),
+              correctAnswer: decodeHTML(q.correct_answer),
+              options: shuffleArray([...q.incorrect_answers.map(decodeHTML), decodeHTML(q.correct_answer)])
+            }));
+          }
         }
+      } catch (e) {
+        console.warn("Trivia API failed:", e);
       }
-    } catch (e) {
-      console.warn("Trivia API failed:", e);
     }
 
     // Fallback to MySQL questions

@@ -1,0 +1,114 @@
+/* Admin Panel Styles */
+.admin-container {
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #581313;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.admin-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.admin-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.admin-tab.active {
+  border-bottom: 3px solid #4a6bff;
+  font-weight: bold;
+}
+
+.admin-content {
+  display: none;
+}
+
+.admin-content.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.option-row input[type="text"] {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.btn-admin {
+  background-color: #4a6bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.btn-admin.secondary {
+  background-color: #6c757d;
+}
+
+.questions-list, .genres-list {
+  margin-top: 20px;
+}
+
+.question-item, .genre-item {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+}
+
+.question-meta {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.question-options div {
+  margin: 5px 0;
+}
+
+.correct-option {
+  font-weight: bold;
+  color: #27ae60;
+}
+
+.question-actions, .genre-actions {
+  margin-top: 10px;
+}

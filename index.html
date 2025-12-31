@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuizTime</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">QuizTime</div>
+    <div class="nav-items">
+      <a href="#" class="nav-link" data-section="home-section"><i class="fas fa-home"></i> Home</a>
+      <a href="#" class="nav-link" data-section="genres-section"><i class="fas fa-list"></i> Genres</a>
+      <a href="#" class="nav-link" data-section="daily-section"><i class="fas fa-calendar-day"></i> Daily Quiz</a>
+    
+      <a href="#" class="nav-link" data-section="leaderboard-section"><i class="fas fa-trophy"></i> Leaderboard</a>
+     <!-- Change this line in index.html -->
+<a href="admin.html" class="nav-link"><i class="fas fa-lock"></i> Admin</a>
+      <!-- <a href="#" class="nav-link" data-section="admin-section"><i class="fas fa-lock"></i> Admin</a> -->
+      
+      <body class="light-theme">
+   
+    </div>
+    <div class="diamond-count">
+      <i class="fas fa-gem"></i> <span id="diamonds">0</span>
+    </div>
+  </nav>
+
+  <div class="theme-toggle">
+    <button id="modeToggle">🌙</button>
+  </div>
+
+  <div class="container">
+    <!-- Home Section -->
+    <section id="home-section" class="content-section active-section">
+      <h1 class="title">Quiz Time</h1>
+      <p class="subtitle">"Let the battle of brains begin!"</p>
+      <button class="start-btn" id="start-quiz">Start Now &gt;&gt;&gt;</button>
+      
+      <div class="features">
+        <div class="feature-card">
+          <i class="fas fa-brain"></i>
+          <h3>8 Genres</h3>
+          <p>Choose from various topics</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-calendar-check"></i>
+          <h3>Daily Quiz</h3>
+          <p>New challenge every day</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-gem"></i>
+          <h3>Earn Diamonds</h3>
+          <p>Redeem for rewards</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Genres Section -->
+    <section id="genres-section" class="content-section">
+      <h2>Choose a Genre</h2>
+      <div class="genre-grid" id="genre-container">
+        <!-- Genres will be populated by JavaScript -->
+      </div>
+    </section>
+
+    <!-- Quiz Section -->
+     <!-- Add this inside your quiz-section -->
+<div class="quiz-hint">
+  <button id="useHint" class="hint-btn" disabled>
+    <i class="fas fa-lightbulb"></i> Use Hint (100 <i class="fas fa-gem"></i>)
+  </button>
+</div>
+
+    <section id="quiz-section" class="content-section">
+      <div class="quiz-header">
+        <h2 id="quiz-genre"></h2>
+        <div class="quiz-progress">
+          Question <span id="current-question">1</span>/<span id="total-questions">10</span>
+        </div>
+      </div>
+      <div class="quiz-controls">
+        <button id="exit-quiz" class="quiz-nav-btn">
+          <i class="fas fa-arrow-left"></i> Exit Quiz
+        </button>
+      </div>
+      <div class="quiz-content-wrapper">
+        <div class="question-container">
+          <h3 id="question-text">Loading question...</h3>
+          <div class="options-container" id="options-container"></div>
+        </div>
+      </div>
+      <div class="quiz-controls">
+        <button id="prev-question" class="quiz-nav-btn" disabled><i class="fas fa-arrow-left"></i> Previous</button>
+        <button id="next-question" class="quiz-nav-btn">Next <i class="fas fa-arrow-right"></i></button>
+        <button id="submit-quiz" class="quiz-submit-btn">Submit Quiz</button>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="content-section">
+      <div class="results-container">
+        <h2>Quiz Results</h2>
+        <div class="score-circle">
+          <span id="score-percent">0%</span>
+        </div>
+        <p>You answered <span id="correct-answers">0</span> out of <span id="total-answers">0</span> questions correctly</p>
+        <p>Earned <i class="fas fa-gem"></i> <span id="diamonds-earned">0</span> diamonds</p>
+        <div class="results-actions">
+          <button class="start-btn" id="back-to-genres">Choose Another Quiz</button>
+          <button class="start-btn secondary" id="retry-quiz">Try Again</button>
+        </div>
+      </div>
+      <div class="detailed-results">
+  <h2>Question Breakdown</h2>
+  <div id="detailed-results-container"></div>
+</div>
+    </section>
+
+    <!-- Daily Quiz Section -->
+    <section id="daily-section" class="content-section">
+      <h2>Daily Quiz Challenge</h2>
+      <div class="daily-info">
+        <p>Complete today's quiz to earn bonus diamonds!</p>
+        <div class="daily-stats">
+          <div>Streak: <span id="streak-count">0</span> days</div>
+          <div>Last completed: <span id="last-completed">Never</span></div>
+        </div>
+      </div>
+      <button class="start-btn" id="start-daily">Start Today's Quiz</button>
+    </section>
+
+    <!-- Leaderboard Section -->
+    <section id="leaderboard-section" class="content-section">
+      <h2>Leaderboard</h2>
+      <div class="leaderboard-tabs">
+        <!-- <button class="tab-btn active" data-tab="daily">Daily</button>
+        <button class="tab-btn" data-tab="weekly">Weekly</button>
+        <button class="tab-btn" data-tab="alltime">All-Time</button> -->
+      </div>
+      <div class="leaderboard-container">
+<table id="leaderboard-table">
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Player</th>
+            <th>Total Score</th>
+            <th>Total Diamonds</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+      </div>
+    </section>
+
+    <!-- Music Control -->
+<!-- Music Player -->
+<div class="music-player">
+  <button id="musicToggle">
+    <i class="fas fa-music"></i>
+    <span id="musicStatus">OFF</span>
+  </button>
+  <audio id="bgMusic" loop>
+    <source src="assets/quiz-bg.mp3" type="audio/mpeg">
+    Your browser does not support audio
+  </audio>
+</div>
+
+
+    <!-- Admin Section -->
+    <!-- <section id="admin-section" class="content-section">
+      <div class="admin-container">
+        <div class="admin-header">
+          <h2><i class="fas fa-lock"></i> Admin Dashboard</h2>
+          <div class="admin-info">Admin: <span class="admin-name">QuizMaster</span></div>
+        </div>
+        
+        <div class="admin-actions">
+          <button id="manage-questions" class="admin-btn active-admin">
+            <i class="fas fa-question-circle"></i> Manage Questions
+          </button>
+          <button id="view-stats" class="admin-btn">
+            <i class="fas fa-chart-bar"></i> View Statistics
+          </button>
+        </div>
+        
+        <div class="admin-panel" id="admin-content">
+          <div id="questions-tab">
+            <h3>Question Management</h3>
+            <p>Add, edit, or remove quiz questions from the database.</p>
+            
+            <form id="question-form">
+              <div class="form-group">
+                <label for="question-genre">Genre</label>
+                <select id="question-genre" class="form-control" required>
+                  <option value="">Select a genre</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="question-difficulty">Difficulty</label>
+                <select id="question-difficulty" class="form-control" required>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="question-text">Question Text</label>
+                <textarea id="admin-question-text" class="form-control" required></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label>Options</label>
+                <div id="options-container">
+                  <div class="option-row">
+                    <input type="text" class="form-control option-input" placeholder="Option 1" required>
+                    <input type="radio" name="correct-answer" value="0" required> Correct
+                  </div>
+                  <div class="option-row">
+                    <input type="text" class="form-control option-input" placeholder="Option 2" required>
+                    <input type="radio" name="correct-answer" value="1"> Correct
+                  </div>
+                  <div class="option-row">
+                    <input type="text" class="form-control option-input" placeholder="Option 3" required>
+                    <input type="radio" name="correct-answer" value="2"> Correct
+                  </div>
+                  <div class="option-row">
+                    <input type="text" class="form-control option-input" placeholder="Option 4" required>
+                    <input type="radio" name="correct-answer" value="3"> Correct
+                  </div>
+                </div>
+              </div>
+              
+              <button type="submit" class="btn-admin">Save Question</button>
+              <button type="reset" class="btn-admin secondary">Clear Form</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div> -->
+
+  <script src="js/script.js"></script>
+</body>
+</html>

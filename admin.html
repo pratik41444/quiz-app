@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuizTime Admin</title>
+
+<link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* Admin-specific styles */
+    .admin-container {
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .admin-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .admin-tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .admin-tab.active {
+      border-bottom: 3px solid #4a6bff;
+      font-weight: bold;
+    }
+    
+    .admin-content {
+      display: none;
+    }
+    
+    .admin-content.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .option-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .option-row input[type="text"] {
+      flex: 1;
+      margin-right: 10px;
+    }
+    
+    .option-row input[type="radio"] {
+      margin-right: 10px;
+    }
+    
+    .btn-admin {
+      background-color: #4a6bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    
+    .btn-admin.secondary {
+      background-color: #6c757d;
+    }
+    
+    .questions-list {
+      margin-top: 20px;
+    }
+    
+    .question-item {
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      background-color: #f9f9f9;
+    }
+    
+    .question-meta {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .question-actions {
+      margin-top: 10px;
+    }
+
+    /* Dark mode admin styles */
+    body.dark-mode .admin-container {
+      background-color: #2d3748;
+      color: #ffffff;
+    }
+
+    body.dark-mode .admin-tab {
+      color: #ffffff;
+    }
+
+    body.dark-mode .form-control {
+      background-color: #4a5568;
+      color: #ffffff;
+      border-color: #4a5568;
+    }
+
+    body.dark-mode .question-item {
+      background-color: #4a5568;
+      border-color: #4a5568;
+      color: #ffffff;
+    }
+
+    body.dark-mode .btn-admin.secondary {
+      background-color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">QuizTime Admin</div>
+    <div class="nav-items">
+      <a href="index.html" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Quiz</a>
+    </div>
+  </nav>
+
+  <div class="admin-container">
+    <div class="admin-tabs">
+      <div class="admin-tab active" data-tab="questions">Manage Questions</div>
+      <div class="admin-tab" data-tab="genres">Manage Genres</div>
+      <!-- <div class="admin-tab" data-tab="settings">Admin Settings</div> -->
+    </div>
+
+    <!-- Questions Tab -->
+    <div id="questions-tab" class="admin-content active">
+      <h2>Add New Question</h2>
+      <form id="question-form">
+        <div class="form-group">
+          <label for="question-genre">Genre</label>
+          <select id="question-genre" class="form-control" required>
+            <!-- Genres will be populated by JavaScript -->
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="question-difficulty">Difficulty</label>
+          <select id="question-difficulty" class="form-control" required>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="question-text">Question Text</label>
+          <textarea id="question-text" class="form-control" required></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Options</label>
+          <div id="options-container">
+            <div class="option-row">
+              <input type="text" class="form-control option-input" placeholder="Option 1" required>
+              <input type="radio" name="correct-answer" value="0" required> Correct
+            </div>
+            <div class="option-row">
+              <input type="text" class="form-control option-input" placeholder="Option 2" required>
+              <input type="radio" name="correct-answer" value="1"> Correct
+            </div>
+            <div class="option-row">
+              <input type="text" class="form-control option-input" placeholder="Option 3" required>
+              <input type="radio" name="correct-answer" value="2"> Correct
+            </div>
+            <div class="option-row">
+              <input type="text" class="form-control option-input" placeholder="Option 4" required>
+              <input type="radio" name="correct-answer" value="3"> Correct
+            </div>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn-admin">Save Question</button>
+        <button type="reset" class="btn-admin secondary">Clear Form</button>
+      </form>
+      
+      <div class="questions-list">
+        <h2>Existing Questions</h2>
+        <div id="questions-list">
+          <!-- Questions will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Genres Tab -->
+    <div id="genres-tab" class="admin-content">
+      <h2>Add New Genre</h2>
+      <form id="genre-form">
+        <div class="form-group">
+          <label for="genre-name">Genre Name</label>
+          <input type="text" id="genre-name" class="form-control" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="genre-icon">Icon Class (Font Awesome)</label>
+          <input type="text" id="genre-icon" class="form-control" placeholder="fas fa-brain">
+        </div>
+        
+        <div class="form-group">
+          <label for="genre-description">Description</label>
+          <textarea id="genre-description" class="form-control"></textarea>
+        </div>
+        
+        <button type="submit" class="btn-admin">Save Genre</button>
+      </form>
+      
+      <div class="questions-list">
+        <h2>Existing Genres</h2>
+        <div id="genres-list">
+          <!-- Genres will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <!-- <div id="settings-tab" class="admin-content">
+      <h2>Admin Settings</h2>
+      <div class="form-group">
+        <label for="admin-password">Change Admin Password</label>
+        <input type="password" id="admin-password" class="form-control" placeholder="New password">
+      </div>
+      <button id="save-password" class="btn-admin">Save Password</button>
+    </div>
+  </div> -->
+
+<script src="js/admin.js"></script>
+
+</body>
+</html>

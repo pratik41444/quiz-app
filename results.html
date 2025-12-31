@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #4a6bff;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .results-container {
+            padding: 30px;
+        }
+        
+        .score-summary {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: #4a6bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(74, 107, 255, 0.3);
+        }
+        
+        .diamonds {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .detailed-results {
+            margin-top: 30px;
+        }
+        
+        .detailed-results h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4a6bff;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .question-result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .answer {
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .correct {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        
+        .incorrect {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .user-answer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .answer-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .correct .answer-icon {
+            color: #28a745;
+        }
+        
+        .incorrect .answer-icon {
+            color: #dc3545;
+        }
+        
+        .user-answer .answer-icon {
+            color: #ffc107;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4a6bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3a5bef;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .category {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+        
+        .performance-chart {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        
+        .chart-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 15px;
+        }
+        
+        .chart-bar-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .chart-bar-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .results-container {
+                padding: 20px;
+            }
+            
+            .score-circle {
+                width: 120px;
+                height: 120px;
+                font-size: 2rem;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .chart-bar {
+                margin: 0 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quiz Results</h1>
+            <p>See how you performed in the quiz</p>
+        </header>
+        
+        <div class="results-container">
+            <div class="score-summary">
+                <div class="score-circle">85%</div>
+                <h2>Great Job!</h2>
+                <p>You answered <strong>17</strong> out of <strong>20</strong> questions correctly</p>
+                <div class="diamonds">
+                    <i class="fas fa-gem" style="color: #4a6bff;"></i>
+                    <span>Earned: <strong>170</strong> diamonds</span>
+                </div>
+            </div>
+            
+            <div class="performance-chart">
+                <div class="chart-bar">
+                    <div class="chart-bar-value">17</div>
+                    <div class="chart-bar-label">Correct</div>
+                </div>
+                <div class="chart-bar">
+                    <div class="chart-bar-value">3</div>
+                    <div class="chart-bar-label">Incorrect</div>
+                </div>
+                <div class="chart-bar">
+                    <div class="chart-bar-value">85%</div>
+                    <div class="chart-bar-label">Score</div>
+                </div>
+            </div>
+            
+            <div class="detailed-results">
+                <h2>Question Breakdown</h2>
+                
+                <div class="question-result">
+                    <span class="category">Science</span>
+                    <div class="question-text">What is the chemical symbol for gold?</div>
+                    <div class="answer correct">
+                        <span class="answer-icon"><i class="fas fa-check-circle"></i></span>
+                        <span>Au (Correct Answer)</span>
+                    </div>
+                    <div class="answer user-answer">
+                        <span class="answer-icon"><i class="fas fa-user"></i></span>
+                        <span>Au (Your Answer)</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>Ag</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>Fe</span>
+                    </div>
+                </div>
+                
+                <div class="question-result">
+                    <span class="category">Geography</span>
+                    <div class="question-text">Which is the longest river in the world?</div>
+                    <div class="answer correct">
+                        <span class="answer-icon"><i class="fas fa-check-circle"></i></span>
+                        <span>Nile (Correct Answer)</span>
+                    </div>
+                    <div class="answer user-answer incorrect">
+                        <span class="answer-icon"><i class="fas fa-times-circle"></i></span>
+                        <span>Amazon (Your Answer - Incorrect)</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>Mississippi</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>Yangtze</span>
+                    </div>
+                </div>
+                
+                <div class="question-result">
+                    <span class="category">History</span>
+                    <div class="question-text">In which year did World War II end?</div>
+                    <div class="answer correct">
+                        <span class="answer-icon"><i class="fas fa-check-circle"></i></span>
+                        <span>1945 (Correct Answer)</span>
+                    </div>
+                    <div class="answer user-answer">
+                        <span class="answer-icon"><i class="fas fa-user"></i></span>
+                        <span>1945 (Your Answer)</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>1918</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>1939</span>
+                    </div>
+                </div>
+                
+                <div class="question-result">
+                    <span class="category">Movies</span>
+                    <div class="question-text">Who directed the movie "Inception"?</div>
+                    <div class="answer correct">
+                        <span class="answer-icon"><i class="fas fa-check-circle"></i></span>
+                        <span>Christopher Nolan (Correct Answer)</span>
+                    </div>
+                    <div class="answer user-answer incorrect">
+                        <span class="answer-icon"><i class="fas fa-times-circle"></i></span>
+                        <span>Steven Spielberg (Your Answer - Incorrect)</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>James Cameron</span>
+                    </div>
+                    <div class="answer">
+                        <span class="answer-icon"><i class="fas fa-circle"></i></span>
+                        <span>Quentin Tarantino</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button class="btn btn-primary">Review All Questions</button>
+                <button class="btn btn-success">Try Another Quiz</button>
+                <button class="btn btn-secondary">Back to Home</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // This script would be integrated with your existing quiz app
+        // The following is a simplified version of what you would implement
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // In a real implementation, you would pull this data from your quiz state
+            const quizResults = {
+                totalQuestions: 20,
+                correctAnswers: 17,
+                scorePercent: 85,
+                diamondsEarned: 170,
+                questions: [
+                    {
+                        category: "Science",
+                        text: "What is the chemical symbol for gold?",
+                        options: ["Au", "Ag", "Fe", "Pb"],
+                        correctAnswer: 0,
+                        userAnswer: 0
+                    },
+                    {
+                        category: "Geography",
+                        text: "Which is the longest river in the world?",
+                        options: ["Nile", "Amazon", "Mississippi", "Yangtze"],
+                        correctAnswer: 0,
+                        userAnswer: 1
+                    },
+                    {
+                        category: "History",
+                        text: "In which year did World War II end?",
+                        options: ["1945", "1918", "1939", "1941"],
+                        correctAnswer: 0,
+                        userAnswer: 0
+                    },
+                    {
+                        category: "Movies",
+                        text: "Who directed the movie 'Inception'?",
+                        options: ["Christopher Nolan", "Steven Spielberg", "James Cameron", "Quentin Tarantino"],
+                        correctAnswer: 0,
+                        userAnswer: 1
+                    }
+                ]
+            };
+            
+            // You would use this data to dynamically generate the result elements
+            // For this example, we've hardcoded the HTML to show the design
+        });
+    </script>
+</body>
+</html>

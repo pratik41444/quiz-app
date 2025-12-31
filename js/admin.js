@@ -1,23 +1,33 @@
 
 (() => {
-  // derive project folder from current path (eg /PRATIK/admin.html -> /PRATIK)
-  const PROJECT_FOLDER = (() => {
+  const ensureTrailingSlash = (value) => (value.endsWith('/') ? value : `${value}/`);
+
+  // If you host PHP elsewhere, set `window.QUIZ_API_BASE` to something like:
+  // https://your-domain.com/PRATIK/php/
+  // or use `?api=https://your-domain.com/PRATIK/php/`
+  const API_BASE = (() => {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get('api');
+    if (fromQuery) return ensureTrailingSlash(fromQuery);
+
+    const fromGlobal = (window.QUIZ_API_BASE || '').trim();
+    if (fromGlobal) return ensureTrailingSlash(fromGlobal);
+
+    // Default: same-origin PHP folder
     const parts = window.location.pathname.split('/').filter(Boolean);
-    if (parts.length === 0) return '';
-    return `/${parts[0]}`;
+    const projectFolder = parts.length > 0 ? `/${parts[0]}` : '';
+    return `${window.location.origin}${projectFolder}/php/`;
   })();
 
-  const BASE_URL = `${window.location.origin}${PROJECT_FOLDER}`;
-
   // Update ADMIN_API to use consistent base
-const ADMIN_API = {
-  genres: `${BASE_URL}/php/admin/get_genres.php`,
-  questions: `${BASE_URL}/php/admin/get_questions.php`,
-  addGenre: `${BASE_URL}/php/admin/add_genre.php`,
-  addQuestion: `${BASE_URL}/php/admin/add_question.php`,
-  deleteGenre: `${BASE_URL}/php/admin/delete_genre.php`,
-  deleteQuestion: `${BASE_URL}/php/admin/delete_question.php`
-};
+  const ADMIN_API = {
+    genres: `${API_BASE}admin/get_genres.php`,
+    questions: `${API_BASE}admin/get_questions.php`,
+    addGenre: `${API_BASE}admin/add_genre.php`,
+    addQuestion: `${API_BASE}admin/add_question.php`,
+    deleteGenre: `${API_BASE}admin/delete_genre.php`,
+    deleteQuestion: `${API_BASE}admin/delete_question.php`
+  };
 
   document.addEventListener('DOMContentLoaded', () => {
     // Query DOM **after** DOM is ready

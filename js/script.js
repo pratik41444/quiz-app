@@ -1,10 +1,22 @@
 
 // -------- CONFIG --------
-const PROJECT_FOLDER = (() => {
+// GitHub Pages cannot run PHP. If you host your PHP API elsewhere,
+// set `window.QUIZ_API_BASE` (recommended) or pass `?api=https://your-host/php/`.
+const API_BASE = (() => {
+  const ensureTrailingSlash = (value) => (value.endsWith('/') ? value : `${value}/`);
+
+  const params = new URLSearchParams(window.location.search);
+  const fromQuery = params.get('api');
+  if (fromQuery) return ensureTrailingSlash(fromQuery);
+
+  const fromGlobal = (window.QUIZ_API_BASE || '').trim();
+  if (fromGlobal) return ensureTrailingSlash(fromGlobal);
+
+  // Default: same-origin PHP folder (works on XAMPP/Apache hosting)
   const parts = window.location.pathname.split('/').filter(Boolean);
-  return parts.length > 0 ? `/${parts[0]}` : '';
+  const projectFolder = parts.length > 0 ? `/${parts[0]}` : '';
+  return `${window.location.origin}${projectFolder}/php/`;
 })();
-const API_BASE = `${window.location.origin}${PROJECT_FOLDER}/php/`;
 
 
 
@@ -79,9 +91,7 @@ const API_CATEGORIES = {
   'geography': { id: 22, name: 'Geography', icon: 'fas fa-map' },
   'movies': { id: 11, name: 'Entertainment: Film', icon: 'fas fa-film' },
   'sports': { id: 21, name: 'Sports', icon: 'fas fa-running' },
-  'music': { id: 12, name: 'Entertainment: Music', icon: 'fas fa-music' },
-  'football': { id: 'football', name: 'Football', icon: 'fas fa-futbol' },
-  'literature': { id: 10, name: 'Entertainment: Books', icon: 'fas fa-book' }
+  'music': { id: 12, name: 'Entertainment: Music', icon: 'fas fa-music' }
 };
 
 // -------- APP STATE --------
@@ -441,6 +451,63 @@ function updateResultsDisplay(correct, total, diamonds) {
   diamondsEarnedSpan.textContent = diamonds;
   AppState.diamonds += diamonds;
   updateDiamondsDisplay();
+
+  renderResultsBreakdown();
+}
+
+function renderResultsBreakdown() {
+  const container = document.getElementById('detailed-results-container');
+  if (!container) return;
+
+  const questions = Array.isArray(AppState.currentQuestions) ? AppState.currentQuestions : [];
+  const answers = Array.isArray(AppState.userAnswers) ? AppState.userAnswers : [];
+
+  const items = questions.map((q, index) => {
+    const questionText = q?.question ?? '';
+    const userAnswer = typeof answers[index] === 'string' ? answers[index] : null;
+    const correctAnswer = q?.correctAnswer ?? '';
+    const isCorrect = userAnswer !== null && userAnswer === correctAnswer;
+    return {
+      index,
+      questionText,
+      userAnswer,
+      correctAnswer,
+      isCorrect
+    };
+  });
+
+  // Show correct answers first, wrong/unanswered at the end.
+  items.sort((a, b) => {
+    const byCorrect = Number(b.isCorrect) - Number(a.isCorrect);
+    if (byCorrect !== 0) return byCorrect;
+    return a.index - b.index;
+  });
+
+  container.innerHTML = '';
+
+  for (const item of items) {
+    const card = document.createElement('div');
+    card.className = 'question-container';
+
+    const title = document.createElement('h3');
+    title.textContent = `Q${item.index + 1}     ${item.isCorrect ? 'Correct' : 'Wrong'}`;
+
+    const qEl = document.createElement('p');
+    qEl.textContent = item.questionText;
+
+    const yourEl = document.createElement('p');
+    yourEl.textContent = `Your answer: ${item.userAnswer ?? 'Not answered'}`;
+
+    const correctEl = document.createElement('p');
+    correctEl.textContent = `Correct answer: ${item.correctAnswer}`;
+
+    card.appendChild(title);
+    card.appendChild(qEl);
+    card.appendChild(yourEl);
+    card.appendChild(correctEl);
+
+    container.appendChild(card);
+  }
 }
 
 // Small helpers for results

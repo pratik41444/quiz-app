@@ -91,8 +91,76 @@ const API_CATEGORIES = {
   'geography': { id: 22, name: 'Geography', icon: 'fas fa-map' },
   'movies': { id: 11, name: 'Entertainment: Film', icon: 'fas fa-film' },
   'sports': { id: 21, name: 'Sports', icon: 'fas fa-running' },
-  'music': { id: 12, name: 'Entertainment: Music', icon: 'fas fa-music' }
+  'music': { id: 12, name: 'Entertainment: Music', icon: 'fas fa-music' },
+  // NOTE: GitHub Pages can't run PHP. Football is rendered as a local fallback
+  // unless a DB-backed "Football" genre is available from the backend.
+  'football': { id: 'football', name: 'Football', icon: 'fas fa-futbol' }
 };
+
+// Local fallback question bank for Football (used on GitHub Pages / no backend).
+// Format matches the app's internal question model.
+const FOOTBALL_QUESTIONS = [
+  {
+    question: 'How many players does each team have on the field in a standard football match (excluding substitutes)?',
+    options: ['9', '10', '11', '12'],
+    correctAnswer: '11'
+  },
+  {
+    question: 'What is the duration of a standard football match (not including extra time)?',
+    options: ['60 minutes', '70 minutes', '80 minutes', '90 minutes'],
+    correctAnswer: '90 minutes'
+  },
+  {
+    question: 'What is a match called when no goals are scored by either team?',
+    options: ['Golden match', 'Clean sheet', 'Goalless draw', 'Deadlock win'],
+    correctAnswer: 'Goalless draw'
+  },
+  {
+    question: 'Which card does a referee show for a sending-off?',
+    options: ['Green card', 'Yellow card', 'Red card', 'Blue card'],
+    correctAnswer: 'Red card'
+  },
+  {
+    question: 'Which country has won the most FIFA World Cups (as of 2022)?',
+    options: ['Germany', 'Italy', 'Brazil', 'Argentina'],
+    correctAnswer: 'Brazil'
+  },
+  {
+    question: 'What does VAR stand for in football?',
+    options: ['Video Assistant Referee', 'Virtual Action Review', 'Verified Automatic Result', 'Video Approved Replay'],
+    correctAnswer: 'Video Assistant Referee'
+  },
+  {
+    question: 'Which position can use hands inside the penalty area?',
+    options: ['Striker', 'Goalkeeper', 'Winger', 'Sweeper'],
+    correctAnswer: 'Goalkeeper'
+  },
+  {
+    question: 'What is the term for scoring three goals in a single match?',
+    options: ['Hat-trick', 'Treble', 'Clean sheet', 'Double'],
+    correctAnswer: 'Hat-trick'
+  },
+  {
+    question: 'Which club plays its home games at Anfield?',
+    options: ['Chelsea', 'Manchester United', 'Liverpool', 'Tottenham Hotspur'],
+    correctAnswer: 'Liverpool'
+  },
+  {
+    question: 'Which country won the FIFA World Cup in 2018?',
+    options: ['Croatia', 'France', 'Germany', 'Brazil'],
+    correctAnswer: 'France'
+  },
+  {
+    question: 'Which country hosted the FIFA World Cup in 2014?',
+    options: ['South Africa', 'Brazil', 'Russia', 'Qatar'],
+    correctAnswer: 'Brazil'
+  },
+  {
+    question: 'Which country won the FIFA World Cup in 2010?',
+    options: ['Spain', 'Netherlands', 'Germany', 'France'],
+    correctAnswer: 'Spain'
+  }
+];
 
 // -------- APP STATE --------
 const AppState = {
@@ -215,6 +283,61 @@ async function renderGenres() {
   } catch (error) {
     console.error('Error loading custom genres:', error);
   }
+
+  // Fetch custom genres from server (MySQL). GitHub Pages can't run PHP, so this
+  // typically fails there.
+  let customGenres = [];
+  try {
+    const response = await fetch(`${API_BASE}admin/get_genres.php?nocache=${Date.now()}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        customGenres = data;
+        AppState.genres = customGenres;
+        localStorage.setItem('quizGenres', JSON.stringify(customGenres));
+      }
+    } else {
+      console.warn('Could not fetch custom genres (network):', response.status);
+    }
+  } catch (error) {
+    console.error('Error loading custom genres:', error);
+  }
+
+  const normalize = (s) => String(s ?? '').trim().toLowerCase();
+  const customFootball = customGenres.find(g => normalize(g.name) === 'football');
+
+  // Render fixed API categories EXCEPT football (football is special-cased below)
+  for (const [genreId, category] of Object.entries(API_CATEGORIES)) {
+    if (genreId === 'football') continue;
+    const genreCard = createGenreCard(category.icon, category.name, () => startQuiz(genreId));
+    genreGrid.appendChild(genreCard);
+  }
+
+  // Render Football: use DB-backed Football if present, else use local fallback
+  if (customFootball) {
+    const genreCard = createGenreCard(
+      customFootball.icon || API_CATEGORIES.football.icon,
+      customFootball.name || API_CATEGORIES.football.name,
+      () => startCustomQuiz(customFootball.id)
+    );
+    genreGrid.appendChild(genreCard);
+  } else {
+    const football = API_CATEGORIES.football;
+    const genreCard = createGenreCard(football.icon, football.name, () => startQuiz('football'));
+    genreGrid.appendChild(genreCard);
+  }
+
+  // Render remaining custom genres (skip Football to avoid duplicates)
+  customGenres
+    .filter(g => normalize(g.name) !== 'football')
+    .forEach(genre => {
+      const genreCard = createGenreCard(
+        genre.icon || 'fas fa-question',
+        genre.name,
+        () => startCustomQuiz(genre.id)
+      );
+      genreGrid.appendChild(genreCard);
+    });
 }
 
 function createGenreCard(icon, name, clickHandler) {
@@ -490,7 +613,7 @@ function renderResultsBreakdown() {
     card.className = 'question-container';
 
     const title = document.createElement('h3');
-    title.textContent = `Q${item.index + 1}     ${item.isCorrect ? 'Correct' : 'Wrong'}`;
+    title.textContent = `Q${item.index + 1} - ${item.isCorrect ? 'Correct' : 'Wrong'}`;
 
     const qEl = document.createElement('p');
     qEl.textContent = item.questionText;
